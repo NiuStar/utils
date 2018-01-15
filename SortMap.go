@@ -20,8 +20,8 @@ func SortMap(list map[string]interface{})[]*NameAndValue {
 		result = append(result,&NameAndValue{value,list[value]})
 	}
 	return result
-
 }
+
 
 func (l *NameAndValue) GetKey() string {
 	return l.key
