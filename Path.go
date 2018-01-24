@@ -22,7 +22,7 @@ func GetCurrPath() string {
 	return "./"
 }
 
-func GetUploadNetPath(domain,hardPath,name string) string{
+func GetUploadNetPath(domain, hardPath, name string) string {
 
 	time.Now().UnixNano()
 
@@ -39,7 +39,6 @@ func lastChar(str string) uint8 {
 	}
 	return str[size-1]
 }
-
 
 func JoinPaths(absolutePath, relativePath string) string {
 	if len(relativePath) == 0 {

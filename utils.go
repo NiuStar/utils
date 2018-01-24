@@ -3,24 +3,24 @@ package utils
 import (
 	"crypto/tls"
 	//"fmt"
+	"bytes"
 	"crypto/md5"
 	"crypto/sha1"
 	b64 "encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 	"runtime"
-	"net"
+	"strings"
 	"time"
-	"errors"
-	"bytes"
 )
 
 // 获取文件大小的接口
@@ -94,25 +94,21 @@ func FormatTimeAll(ltime int64) string {
 	return tm.Format("2006-01-02 15:04:05")
 }
 
-
-
-func GetNetPath(uri string,path string) string {
+func GetNetPath(uri string, path string) string {
 	s := os.Args[0]
-	fmt.Println("os.Args[0] : ",s)
+	fmt.Println("os.Args[0] : ", s)
 	var index int = 0
 	if runtime.GOOS == "windows" {
-		index = strings.LastIndex(s,"\\")
-
-
+		index = strings.LastIndex(s, "\\")
 
 	} else {
-		index = strings.LastIndex(s,"/")
+		index = strings.LastIndex(s, "/")
 	}
 
-	fmt.Println("index :",index)
-	s = s[0:index + 1]
+	fmt.Println("index :", index)
+	s = s[0 : index+1]
 
-	if strings.LastIndex(uri,"/") != len(uri) - 1 {
+	if strings.LastIndex(uri, "/") != len(uri)-1 {
 		uri += "/"
 	}
 
@@ -122,7 +118,7 @@ func GetNetPath(uri string,path string) string {
 
 func ReadFile(path string) string {
 	path = GetCurrPath() + path
-	fmt.Println("path:  " , path)
+	fmt.Println("path:  ", path)
 	fi, err := os.Open(path)
 	if err != nil {
 		fmt.Println(err)
@@ -145,7 +141,6 @@ func PathExists(path string) (bool, error) {
 
 func ReadFileFullPath(path string) string {
 
-
 	fi, err := os.Open(path)
 	if err != nil {
 		fmt.Println(err)
@@ -155,20 +150,19 @@ func ReadFileFullPath(path string) string {
 	return string(fd)
 }
 
-
 func Base64Encode(str string) string {
 	return b64.StdEncoding.EncodeToString([]byte(str))
 	//return coder.EncodeToString([]byte(str))
 }
 
-func Base64Decode(str string) (string,bool) {
+func Base64Decode(str string) (string, bool) {
 	str = strings.Replace(str, " ", "+", -1)
 	data, err := b64.StdEncoding.DecodeString(str)
 	if err != nil {
 		fmt.Println(err)
-		return "",false
+		return "", false
 	}
-	return string(data),true
+	return string(data), true
 }
 
 func FormatImageBase64FormURL(data string) string {
@@ -178,15 +172,14 @@ func FormatImageBase64FormURL(data string) string {
 	png_head := "data:image/png;base64,"
 	imgData := ""
 
-
-	dataArray := strings.Split(data,jpg_head)
+	dataArray := strings.Split(data, jpg_head)
 	data = ""
-	for _,value := range dataArray {
+	for _, value := range dataArray {
 		data += value
 	}
-	dataArray = strings.Split(data,png_head)
+	dataArray = strings.Split(data, png_head)
 
-	for _,value := range dataArray {
+	for _, value := range dataArray {
 		imgData += value
 	}
 
@@ -278,57 +271,57 @@ func SHA1(str string) string {
 
 }
 
-func GetValueInt(list map[string]interface{},key string) (int,error ){
+func GetValueInt(list map[string]interface{}, key string) (int, error) {
 	if list[key] == nil {
-		return 0,nil
+		return 0, nil
 	}
 	switch list[key].(type) {
 	case int:
 		{
-			return  list[key].(int),nil
+			return list[key].(int), nil
 		}
 	default:
 		{
-			return 0,errors.New("不是int类型")
+			return 0, errors.New("不是int类型")
 		}
 	}
-	return 0,errors.New("未知类型")
+	return 0, errors.New("未知类型")
 }
 
-
-func GetValueString(list map[string]interface{},key string) (string,error ){
+func GetValueString(list map[string]interface{}, key string) (string, error) {
 	if list[key] == nil {
-		return "",nil
+		return "", nil
 	}
 	switch list[key].(type) {
 	case string:
 		{
-			return  list[key].(string),nil
+			return list[key].(string), nil
 		}
 	default:
 		{
-			return "",errors.New("不是string类型")
+			return "", errors.New("不是string类型")
 		}
 	}
-	return "",errors.New("未知类型")
+	return "", errors.New("未知类型")
 }
 
-func GetValueFloat(list map[string]interface{},key string) (float64,error ){
+func GetValueFloat(list map[string]interface{}, key string) (float64, error) {
 	if list[key] == nil {
-		return 0,nil
+		return 0, nil
 	}
 	switch list[key].(type) {
 	case float64:
 		{
-			return  list[key].(float64),nil
+			return list[key].(float64), nil
 		}
 	default:
 		{
-			return 0,errors.New("不是float类型")
+			return 0, errors.New("不是float类型")
 		}
 	}
-	return 0,errors.New("未知类型")
+	return 0, errors.New("未知类型")
 }
+
 /*
 func GET(uri string) string {
 	resp, err := http.Get(uri)
@@ -345,20 +338,19 @@ func GET(uri string) string {
 	return string(body)
 }*/
 
-
-func GETAll(uri string,req *http.Request) (int,string) {
+func GETAll(uri string, req *http.Request) (int, string) {
 
 	var client = &http.Client{}
 	//向服务端发送get请求
 
 	request, _ := http.NewRequest("GET", uri, nil)
 	request.Header = req.Header
-	request.Header.Add("X-Forwarded-For","cninct.com")
-	request.Header.Add("X-Real-Ip",req.RemoteAddr)
+	request.Header.Add("X-Forwarded-For", "cninct.com")
+	request.Header.Add("X-Real-Ip", req.RemoteAddr)
 	//request.Header.Add("REMOTE_ADDR",req.RemoteAddr)
 	request.RemoteAddr = req.RemoteAddr
 
-	for _,value := range req.Cookies() {
+	for _, value := range req.Cookies() {
 		request.AddCookie(value)
 	}
 
@@ -368,16 +360,17 @@ func GETAll(uri string,req *http.Request) (int,string) {
 
 		fmt.Println(err)
 
-		return 404,""
+		return 404, ""
 	}
 
 	defer response.Body.Close()
 	body, _ := ioutil.ReadAll(response.Body)
-	return response.StatusCode,string(body)
+	return response.StatusCode, string(body)
 	//return 404,""
 }
 
 var POST_REMOTE_TIMEOUT time.Duration = 5
+
 func dialTimeout(network, addr string) (net.Conn, error) {
 	conn, err := net.DialTimeout(network, addr, time.Second*POST_REMOTE_TIMEOUT)
 	if err != nil {
@@ -390,11 +383,11 @@ func dialTimeout(network, addr string) (net.Conn, error) {
 	return tcp_conn, err
 }
 
-func GETHTMLResult(uri string,req *http.Request) (int,string,bool,string) {
+func GETHTMLResult(uri string, req *http.Request) (int, string, bool, string) {
 
 	var client = http.Client{
 		Transport: &http.Transport{
-			Dial: func (network, addr string) (net.Conn, error) {
+			Dial: func(network, addr string) (net.Conn, error) {
 				conn, err := net.DialTimeout(network, addr, time.Second*POST_REMOTE_TIMEOUT)
 				if err != nil {
 					return conn, err
@@ -411,12 +404,12 @@ func GETHTMLResult(uri string,req *http.Request) (int,string,bool,string) {
 
 	request, _ := http.NewRequest("GET", uri, nil)
 	request.Header = req.Header
-	request.Header.Add("X-Forwarded-For","cninct.com")
-	request.Header.Add("X-Real-Ip",req.RemoteAddr)
+	request.Header.Add("X-Forwarded-For", "cninct.com")
+	request.Header.Add("X-Real-Ip", req.RemoteAddr)
 	//request.Header.Add("REMOTE_ADDR",req.RemoteAddr)
 	request.RemoteAddr = req.RemoteAddr
 
-	for _,value := range req.Cookies() {
+	for _, value := range req.Cookies() {
 		request.AddCookie(value)
 	}
 
@@ -426,7 +419,7 @@ func GETHTMLResult(uri string,req *http.Request) (int,string,bool,string) {
 
 		fmt.Println(err)
 
-		return 404,"",false,""
+		return 404, "", false, ""
 	}
 
 	//request.Close()
@@ -436,10 +429,10 @@ func GETHTMLResult(uri string,req *http.Request) (int,string,bool,string) {
 	defer response.Body.Close()
 	//fmt.Println("response.Header:",response)
 	//fmt.Println("type init : ",response.Header.Get("Content-Type"))
-	if strings.Contains(response.Header.Get("Content-Type"),"text/plain") {
-		return response.StatusCode, string(body), false,response.Header.Get("Content-Type") //判断返回的是否为文件，不是
+	if strings.Contains(response.Header.Get("Content-Type"), "text/plain") {
+		return response.StatusCode, string(body), false, response.Header.Get("Content-Type") //判断返回的是否为文件，不是
 	} else {
-		return response.StatusCode,string(body),true,response.Header.Get("Content-Type") //是，且是HTML
+		return response.StatusCode, string(body), true, response.Header.Get("Content-Type") //是，且是HTML
 	}
 
 	//return 404,""
@@ -447,7 +440,7 @@ func GETHTMLResult(uri string,req *http.Request) (int,string,bool,string) {
 
 func GETS(uri string) string {
 	tr := &http.Transport{
-		TLSClientConfig:    &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	client := &http.Client{Transport: tr}
 	//向服务端发送get请求
@@ -495,7 +488,7 @@ func GET(uri string) string {
 	return ""
 }
 
-func GETForward(uri string) (string,string) {
+func GETForward(uri string) (string, string) {
 	var client = &http.Client{}
 	//向服务端发送get请求
 
@@ -505,7 +498,7 @@ func GETForward(uri string) (string,string) {
 
 	if err != nil {
 		fmt.Println(err)
-		return "",""
+		return "", ""
 	}
 
 	type_ := response.Header.Get("Content-Type")
@@ -513,45 +506,42 @@ func GETForward(uri string) (string,string) {
 
 		body, _ := ioutil.ReadAll(response.Body)
 		response.Body.Close()
-		return string(body),type_
+		return string(body), type_
 
 	}
 
 	response.Body.Close()
-	return "",type_
+	return "", type_
 }
 
-
-func POSTAll(uri string, req1 *http.Request,data1 string) (int,string,http.Header) {
-	fmt.Println("Content-Type : ",req1.Header["Content-Type"])
-
-
+func POSTAll(uri string, req1 *http.Request, data1 string) (int, string, http.Header) {
+	fmt.Println("Content-Type : ", req1.Header["Content-Type"])
 
 	var req *http.Request
 
 	if len(req1.PostForm) > 0 {
-		fmt.Println("req1.PostForm.Encode():",req1.PostForm.Encode())
+		fmt.Println("req1.PostForm.Encode():", req1.PostForm.Encode())
 		body := ioutil.NopCloser(strings.NewReader(req1.PostForm.Encode())) //把form数据编下码
 
 		req, _ = http.NewRequest("POST", uri, body)
-		if len(req1.Header["Content-Type"] ) > 0 {
+		if len(req1.Header["Content-Type"]) > 0 {
 			req.Header.Set("Content-Type", req1.Header["Content-Type"][0])
 		}
 		//req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	}
-	fmt.Println("Content-Type BODY : ",data1)
+	fmt.Println("Content-Type BODY : ", data1)
 
-	if  len(req1.PostForm) <= 0 && req1.MultipartForm != nil && req1.MultipartForm.File != nil && len(req1.MultipartForm.File) > 0 {
+	if len(req1.PostForm) <= 0 && req1.MultipartForm != nil && req1.MultipartForm.File != nil && len(req1.MultipartForm.File) > 0 {
 		body := new(bytes.Buffer) // caveat IMO dont use this for large files, \
 		// create a tmpfile and assemble your multipart from there (not tested)
 		w := multipart.NewWriter(body)
-		for key,value := range req1.MultipartForm.File {
-			for _,value2 := range value {
+		for key, value := range req1.MultipartForm.File {
+			for _, value2 := range value {
 				fw, err := w.CreateFormFile(key, value2.Filename)
 				if err != nil {
 					fmt.Println(err)
 				}
-				fd,err := value2.Open()
+				fd, err := value2.Open()
 				if err != nil {
 					fmt.Println(err)
 				}
@@ -565,16 +555,16 @@ func POSTAll(uri string, req1 *http.Request,data1 string) (int,string,http.Heade
 			}
 		}
 		w.Close()
-		fmt.Println("POST File",body)
+		fmt.Println("POST File", body)
 		req, _ = http.NewRequest("POST", uri, body)
 		req.Header.Set("Content-Type", w.FormDataContentType())
 
-		list := strings.Split(data1,"\r\n")
+		list := strings.Split(data1, "\r\n")
 		var contenttype string
-		for _,value := range list {
-			fmt.Println("value:",value)
-			if strings.HasPrefix(value,"Content-Type: ") {
-				l := strings.Split(value,":")
+		for _, value := range list {
+			fmt.Println("value:", value)
+			if strings.HasPrefix(value, "Content-Type: ") {
+				l := strings.Split(value, ":")
 				if len(l) == 2 {
 					contenttype = l[1]
 				}
@@ -588,42 +578,36 @@ func POSTAll(uri string, req1 *http.Request,data1 string) (int,string,http.Heade
 
 	//req, _ := http.NewRequest("POST", uri, body)
 
-
 	if req == nil {
 
 		req, _ = http.NewRequest("POST", uri, req1.Body)
-		for _,value := range req1.Header["Content-Type"]  {
+		for _, value := range req1.Header["Content-Type"] {
 			req.Header.Add("Content-Type", value)
 		}
 		//fmt.Println("2 req == nil")
 
 	}
 
-
-
-
-
 	var client = &http.Client{}
 	//向服务端发送get请求
 
-
-	req.Header.Add("X-Forwarded-For","cninct.com")
-	req.Header.Add("X-Real-Ip",req1.RemoteAddr)
+	req.Header.Add("X-Forwarded-For", "cninct.com")
+	req.Header.Add("X-Real-Ip", req1.RemoteAddr)
 	//request.Header.Add("REMOTE_ADDR",req.RemoteAddr)
 	req.RemoteAddr = req1.RemoteAddr
 
-	for _,value := range req1.Cookies() {
+	for _, value := range req1.Cookies() {
 		req.AddCookie(value)
 	}
 
-	fmt.Println("req:",req)
+	fmt.Println("req:", req)
 
 	resp, err := client.Do(req)
 
 	if err != nil {
 		// handle error
 		fmt.Println(err)
-		return 404,"{}",nil
+		return 404, "{}", nil
 	}
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -633,7 +617,7 @@ func POSTAll(uri string, req1 *http.Request,data1 string) (int,string,http.Heade
 	header := resp.Header
 	resp.Body.Close()
 	//fmt.Println("result : ",string(data))
-	return resp.StatusCode,string(data),header
+	return resp.StatusCode, string(data), header
 
 }
 
@@ -648,7 +632,7 @@ func POST(uri string, datas map[string]string) string {
 
 	req, _ := http.NewRequest("POST", uri, body)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
-	req.AddCookie(&http.Cookie{Name:"_gat",Value:"1",Domain:".sslforfree.com",Path:"/"})
+	req.AddCookie(&http.Cookie{Name: "_gat", Value: "1", Domain: ".sslforfree.com", Path: "/"})
 	resp, err := client.Do(req)
 
 	if err != nil {
@@ -666,7 +650,6 @@ func POST(uri string, datas map[string]string) string {
 
 }
 
-
 func POSTS(uri string, datas map[string]string) string {
 	postValues := url.Values{}
 	for key, value := range datas {
@@ -674,14 +657,14 @@ func POSTS(uri string, datas map[string]string) string {
 	}
 	//body := ioutil.NopCloser(strings.NewReader(postValues.Encode())) //把form数据编下码
 	tr := &http.Transport{
-		TLSClientConfig:    &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	client := &http.Client{Transport: tr}
 	/*resp,err := client.Post(
-		uri,
-		"application/x-www-form-urlencoded",
-		body)*/
-	resp,err := client.PostForm(uri,postValues)
+	uri,
+	"application/x-www-form-urlencoded",
+	body)*/
+	resp, err := client.PostForm(uri, postValues)
 
 	if err != nil {
 		// handle error
@@ -751,10 +734,10 @@ func PostDataForWSDL(uri string, datas string) string {
 
 }
 
-func UrlDecode(v string) (string,error) {
+func UrlDecode(v string) (string, error) {
 	l3, err3 := url.QueryUnescape(v)
 
-	return l3,err3
+	return l3, err3
 }
 
 func UrlEncode(v string) string {
@@ -762,20 +745,22 @@ func UrlEncode(v string) string {
 
 	return l3
 }
+
 //新建一个map，里面存放的数据是数组
-func Map_A(name string,data []map[string]interface{}) map[string]interface{}{
+func Map_A(name string, data []map[string]interface{}) map[string]interface{} {
 	data_new := make(map[string]interface{})
 	data_new[name] = data
 	return data_new
 }
+
 //新建一个map，里面存放的数据是map
-func Map_M(name string,data map[string]interface{}) map[string]interface{}{
+func Map_M(name string, data map[string]interface{}) map[string]interface{} {
 	data_new := make(map[string]interface{})
 	data_new[name] = data
 	return data_new
 }
-func GetMax(first int64, args... int64) int64 {
-	for _ , v := range args{
+func GetMax(first int64, args ...int64) int64 {
+	for _, v := range args {
 		if first < v {
 			first = v
 		}

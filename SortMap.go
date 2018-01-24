@@ -3,11 +3,11 @@ package utils
 import "sort"
 
 type NameAndValue struct {
-	key string
+	key   string
 	value interface{}
 }
 
-func SortMap(list map[string]interface{})[]*NameAndValue {
+func SortMap(list map[string]interface{}) []*NameAndValue {
 
 	var keyList []string
 	var result []*NameAndValue
@@ -16,17 +16,16 @@ func SortMap(list map[string]interface{})[]*NameAndValue {
 		keyList = append(keyList, key)
 	}
 	sort.Strings(keyList)
-	for _,value := range keyList {
-		result = append(result,&NameAndValue{value,list[value]})
+	for _, value := range keyList {
+		result = append(result, &NameAndValue{value, list[value]})
 	}
 	return result
 }
 
-
 func (l *NameAndValue) GetKey() string {
 	return l.key
 }
-func (l *NameAndValue) GetValue() interface {} {
+func (l *NameAndValue) GetValue() interface{} {
 
 	return l.value
 }
