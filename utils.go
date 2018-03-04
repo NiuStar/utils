@@ -45,6 +45,18 @@ func CheckFileIsExist(filename string) bool {
 	return exist
 }
 
+//判断字符是否为大写
+func IsCapital(char uint8) bool {
+
+	var i uint8
+	for  i = 'A' ; i < 'Z' + 1 ; i ++ {
+		if i == char {
+			return true
+		}
+	}
+	return false
+}
+
 /*********
 reqString = Substr(reqString, 0, len(reqString)-1)
 *********/
@@ -196,11 +208,11 @@ func FormatImageBase64FormURL(data string) string {
 }
 
 func WriteToFile(path string, data string) error {
-	return ioutil.WriteFile(path, []byte(data), 0666) //写入文件(字节数组)
+	return ioutil.WriteFile(path, []byte(data), 0777) //写入文件(字节数组)
 }
 
 func Mkdir(path string) bool {
-	err := os.MkdirAll(path, 0666)
+	err := os.MkdirAll(path, 0777)
 	if err != nil {
 		fmt.Printf("%s", err)
 		return false
