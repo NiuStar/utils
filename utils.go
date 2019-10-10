@@ -153,12 +153,11 @@ func PathExists(path string) (bool, error) {
 
 func ReadFileFullPath(path string) string {
 
-	fi, err := os.Open(path)
+
+	fd, err := ioutil.ReadFile(path)
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	}
-	defer fi.Close()
-	fd, err := ioutil.ReadAll(fi)
 	return string(fd)
 }
 
@@ -642,7 +641,13 @@ func POST(uri string, datas map[string]string) string {
 	var client = &http.Client{}
 	//向服务端发送get请求
 
-	req, _ := http.NewRequest("POST", uri, body)
+	req, err := http.NewRequest("POST", uri, body)
+
+	if err != nil {
+		// handle error
+		fmt.Println(err)
+		return ""
+	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded; param=value")
 	req.AddCookie(&http.Cookie{Name: "_gat", Value: "1", Domain: ".sslforfree.com", Path: "/"})
 	resp, err := client.Do(req)
@@ -657,7 +662,9 @@ func POST(uri string, datas map[string]string) string {
 		fmt.Println(err)
 		// handle error
 	}
+
 	resp.Body.Close()
+
 	return string(data)
 
 }
@@ -698,7 +705,7 @@ func PostData(uri string, datas string) string {
 	body := ioutil.NopCloser(strings.NewReader(datas)) //把form数据编下码
 	var client = &http.Client{}
 	//向服务端发送get请求
-	//fmt.Println(uri,"body",datas)
+	fmt.Println(uri,"body",datas)
 	req, _ := http.NewRequest("POST", uri, body)
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := client.Do(req)

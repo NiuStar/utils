@@ -51,9 +51,13 @@ func CompressDir(dir, dest string) {
 		w.Close()
 		fzip.Close()
 	}()
+	name := filepath.Base(dir)
+	fmt.Println("name:",name)
+	w.Create(name + "/")
 	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
-		fmt.Println("path:",path)
-		path2 := Substr(filepath.Clean(path),len(filepath.Clean(dir)),len(filepath.Clean(path)))
+		//fmt.Println("path:",path)
+		//fmt.Println("filepath.Clean(path):",filepath.Clean(path))
+		path2 := name + "/" + path[len(dir):len(path)]//Substr(filepath.Clean(path),len(filepath.Clean(dir)),len(filepath.Clean(path)))
 
 		if strings.HasPrefix(path2,"/") {
 			path2 = Substr(path2,1,len(path2))
@@ -62,16 +66,21 @@ func CompressDir(dir, dest string) {
 		}
 
 		path2 = strings.Replace(path2,"\\","/",-1)
+		path2 = strings.Replace(path2,"//","/",-1)
 		fmt.Println("path2:",path2)
 		if !info.IsDir() {
-			//path2 = strings.Replace(path2,"\\","/")
-			fw, _ := w.Create(path2)
+			fw, err := w.Create(path2)
+			if err != nil {
+
+				fmt.Println("Create error:",err)
+				return nil
+			}
 			fi, err := os.Open(path)
 			if err != nil {
-				fmt.Println(err)
+				fmt.Println("Open error:",err)
+				return nil
 			}
 			defer fi.Close()
-
 			io.Copy(fw,fi)
 
 		} else {

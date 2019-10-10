@@ -1,6 +1,11 @@
 package utils
 
-import "strconv"
+import (
+	"strconv"
+	"unicode/utf8"
+	"strings"
+	"unicode"
+)
 
 func Convert2String(value interface{}) string {
 	switch value.(type) {
@@ -36,4 +41,35 @@ func Convert2String(value interface{}) string {
 		break
 	}
 	return ""
+}
+
+func ToUpperOnlyFirstChar(str string) string {
+
+	s := str[:1]
+
+	isASCII, hasLower := true, false
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if c >= utf8.RuneSelf {
+			isASCII = false
+			break
+		}
+		hasLower = hasLower || (c >= 'a' && c <= 'z')
+	}
+
+	if isASCII { // optimize for ASCII-only strings.
+		if !hasLower {
+			return s
+		}
+		b := make([]byte, len(s))
+		for i := 0; i < len(s); i++ {
+			c := s[i]
+			if c >= 'a' && c <= 'z' {
+				c -= 'a' - 'A'
+			}
+			b[i] = c
+		}
+		return string(b) + str[1:]
+	}
+	return strings.Map(unicode.ToUpper, s) + str[1:]
 }

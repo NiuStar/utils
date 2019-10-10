@@ -11,13 +11,23 @@ import (
 )
 
 func GetCurrPath() string {
-	/*if runtime.GOOS == "windows" {
-		file, _ := exec.LookPath(os.Args[0])
+	/*if strings.HasSuffix(os.Args[0],"___go_build_main_go") {
+		return "./"
+	}
+	if runtime.GOOS == "windows" {
+		/*file, _ := exec.LookPath(os.Args[0])
 		path, _ := filepath.Abs(file)
 		path = path[0:strings.LastIndex(path,"\\")] + "\\"
-		return path
+		return path*/
+	/*	return "./"
 	} else{
-		return "./"
+		dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+		if err != nil {
+			panic(err)
+		}
+		return strings.Replace(dir, "\\", "/", -1) + "/"
+
+
 	}*/
 	return "./"
 }
